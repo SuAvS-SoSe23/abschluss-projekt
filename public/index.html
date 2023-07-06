@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <meta charset="utf-8" />
+    <title>IoT Website</title>
+  </head>
+  <body>
+    <div class="card-container">
+      <div class="card">
+        <h2>Plant health</h2>
+        <img src="plant.png" alt="plant image" />
+        <p id="moisturePercentage">Soil moisture Percentage: N/A</p>
+        <p id="lastUpdated">Last Updated: N/A</p>
+      </div>
+    </div>
+
+    <div class="card-container">
+      <div class="card card-small">
+        <h2>Set a reminder</h2>
+        <div class="input-container">
+          <input id="messageInput" type="text" maxlength="20" />
+          <button id="sendButton">Send Message</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="client.js"></script>
+
+    <script>
+      document.getElementById("sendButton").addEventListener("click", () => {
+        const message = document.getElementById("messageInput").value;
+
+        fetch("/sendMessage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message }),
+        }).catch((error) => console.error("Error:", error));
+      });
+
+      setInterval(() => {
+        fetch("/db")
+          .then((response) => response.json())
+          .then((data) => {
+            const moisturePercentage = data.moisturePercentage;
+            document.getElementById("moisturePercentage").textContent =
+              "Moisture Percentage: " + moisturePercentage;
+            const lastUpdated = data.lastUpdated;
+            document.getElementById("lastUpdated").textContent =
+              "Last Updated: " + new Date(lastUpdated).toLocaleString();
+          })
+          .catch((error) => console.error("Error:", error));
+      }, 10000);
+    </script>
+  </body>
+</html>
